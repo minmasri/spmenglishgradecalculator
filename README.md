@@ -39,9 +39,9 @@ Just enter your marks for each paper:
 
 ---
 ## 👩🏻‍🏫 Created By
-Nur Syahmin Alya Masri
-PPPDG10
-📧 n.syahminalya@gmail.com
+- Nur Syahmin Alya Masri
+- PPPDG10
+- 📧 n.syahminalya@gmail.com
 
 ---
 
