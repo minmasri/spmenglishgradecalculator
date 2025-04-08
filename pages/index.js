@@ -137,10 +137,10 @@ export default function Home() {
         )}
         <div className="h-4" />
         <div className="space-y-4">
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 2 (Reading) /40" type="number" value={reading} onChange={(e) => setReading(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 1 (Writing) /60" type="number" value={writing} onChange={(e) => setWriting(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 4 (Speaking) /24" type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 3 (Listening) /30" type="number" value={listening} onChange={(e) => setListening(e.target.value)} />
+          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 1 (Reading) /40" type="number" value={reading} onChange={(e) => setReading(e.target.value)} />
+          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 2 (Writing) /60" type="number" value={writing} onChange={(e) => setWriting(e.target.value)} />
+          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 3 (Speaking) /24" type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} />
+          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 4 (Listening) /30" type="number" value={listening} onChange={(e) => setListening(e.target.value)} />
         </div>
         <div className="bg-green-50 p-4 rounded-lg shadow-md mt-4 space-y-2">
           <p><strong>Student Name:</strong> {studentName || "—"}</p>
