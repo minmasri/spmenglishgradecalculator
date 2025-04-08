@@ -180,7 +180,7 @@ export default function Home() {
         {/* Footer */}
         <footer className="text-xs text-center pt-4 border-t">
           <p>Made with 💙 for Form 5 students</p>
-          <p>Created by Nur Syahmin Alya Masri · PPPDG10 · <a className="text-blue-500" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
+          <p>Created by Nur Syahmin Alya Masri @ SMKA Kuala Lipis · PPPDG10 · <a className="text-blue-500" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
         </footer>
       </div>
     </div>
