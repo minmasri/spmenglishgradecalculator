@@ -38,6 +38,12 @@ Just enter your marks for each paper:
 - [Tailwind CSS](https://tailwindcss.com/)
 
 ---
+## 👩🏻‍🏫 Created By
+Nur Syahmin Alya Masri
+PPPDG10
+📧 n.syahminalya@gmail.com
+
+---
 
 ## 🚀 How to Deploy (for developers)
 
