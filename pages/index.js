@@ -7,7 +7,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState('');
   const [target, setTarget] = useState('');
   const [studentName, setStudentName] = useState('');
-  const [date, setDate] = useState('');
 
   const weights = {
     writing: 0.25,
@@ -94,7 +93,6 @@ export default function Home() {
 
   const resetAll = () => {
     setStudentName('');
-    setDate('');
     setWriting('');
     setReading('');
     setListening('');
@@ -106,62 +104,50 @@ export default function Home() {
   const etr = target ? getETR() : null;
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 p-6">
+    <div className="min-h-screen bg-gray-100 text-gray-900 p-6 print:bg-white print:text-black">
       <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
 
-        {/* Header with Reset + Print buttons */}
         <div className="flex justify-between items-center space-x-2">
           <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Estimator</h1>
           <div className="flex space-x-2">
-            <button
-              onClick={resetAll}
-              className="text-sm bg-red-500 text-white px-3 py-1 rounded"
-            >
-              Reset All
-            </button>
-            <button
-              onClick={() => window.print()}
-              className="text-sm bg-blue-500 text-white px-3 py-1 rounded"
-            >
-              Print Report
-            </button>
+            <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset All</button>
+            <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print Report</button>
           </div>
         </div>
 
-        {/* Student info */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <input className="p-2 border rounded" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
-          <input className="p-2 border rounded" placeholder="Date (e.g. 9 April 2025)" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
 
-        {/* Target */}
         <input className="w-full p-2 border rounded" placeholder="Target (ETR) % (e.g. 85)" type="number" value={target} onChange={(e) => setTarget(e.target.value)} />
 
-        {/* ETR Results */}
-        {target && (
-          <div className="bg-blue-50 p-4 rounded-lg shadow-md space-y-2">
-            <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
-            {etr.message ? (
-              <p>{etr.message}</p>
-            ) : (
-              <>
-                {Object.entries(etr).filter(([k]) => k !== 'overallNote').map(([paper, val]) => (
-                  <div key={paper}>
-                    <p className="text-lg font-semibold">
-                      You need <strong>{val.required}</strong> marks in <em>{paper}</em>
-                    </p>
-                    {val.note && <p className="text-red-500 text-sm">{val.note}</p>}
-                  </div>
-                ))}
-                {etr.overallNote && <p className="text-red-600 font-semibold">{etr.overallNote}</p>}
-              </>
-            )}
+        <div className="print-only">
+          {target && (
+            <div className="bg-blue-50 p-4 rounded-lg shadow-md space-y-2">
+              <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
+              {etr.message ? (
+                <p>{etr.message}</p>
+              ) : (
+                <>
+                  {Object.entries(etr).filter(([k]) => k !== 'overallNote').map(([paper, val]) => (
+                    <div key={paper}>
+                      <p className="text-lg font-semibold">You need <strong>{val.required}</strong> marks in <em>{paper}</em></p>
+                      {val.note && <p className="text-red-500 text-sm">{val.note}</p>}
+                    </div>
+                  ))}
+                  {etr.overallNote && <p className="text-red-600 font-semibold">{etr.overallNote}</p>}
+                </>
+              )}
+            </div>
+          )}
+
+          <div className="bg-green-50 p-4 rounded-lg shadow-md mt-4 space-y-2">
+            <p><strong>Student Name:</strong> {studentName || "—"}</p>
+            <p><strong>Current Estimated Total:</strong> {score.percentage}%</p>
+            <p><strong>Estimated Grade:</strong> {score.grade}</p>
           </div>
-        )}
+        </div>
 
-        <div className="h-4" />
-
-        {/* Paper Inputs in Correct Order */}
         <div className="space-y-4">
           <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 1 (Reading) /40" type="number" value={reading} onChange={(e) => setReading(e.target.value)} />
           <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 2 (Writing) /60" type="number" value={writing} onChange={(e) => setWriting(e.target.value)} />
@@ -169,18 +155,11 @@ export default function Home() {
           <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 4 (Listening) /30" type="number" value={listening} onChange={(e) => setListening(e.target.value)} />
         </div>
 
-        {/* Score Summary */}
-        <div className="bg-green-50 p-4 rounded-lg shadow-md mt-4 space-y-2">
-          <p><strong>Student Name:</strong> {studentName || "—"}</p>
-          <p><strong>Date:</strong> {date || "—"}</p>
-          <p><strong>Current Estimated Total:</strong> {score.percentage}%</p>
-          <p><strong>Estimated Grade:</strong> {score.grade}</p>
-        </div>
-
-        {/* Footer */}
-        <footer className="text-xs text-center pt-4 border-t">
-          <p>Made with 💙 for SPM candidates</p>
-          <p>Created by Nur Syahmin Alya Masri · SMKA Kuala Lipis · PPPDG10 · <a className="text-blue-500" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
+        <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm">
+          <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
+          <p className="font-semibold">Nur Syahmin Alya Masri</p>
+          <p>PPPDG10</p>
+          <p>📧 <a className="text-blue-600 hover:underline" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
         </footer>
       </div>
     </div>
