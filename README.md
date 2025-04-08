@@ -39,8 +39,7 @@ Just enter your marks for each paper:
 
 ---
 ## 👩🏻‍🏫 Created By
-- Nur Syahmin Alya Masri
-- PPPDG10
+- Nur Syahmin Alya Masri, PPP DG10(KUP)
 - 📧 n.syahminalya@gmail.com
 
 ---
