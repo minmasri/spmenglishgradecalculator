@@ -1,6 +1,6 @@
 # 🎯 SPM CEFR English Grade Estimator
 
-A free, student-friendly web app to estimate your English CEFR grade for SPM 2025 — based on individual paper marks and target grade!
+A free, student-friendly web app to estimate your English grade for SPM CEFR — based on individual paper marks and target grade!
 
 ---
 
