@@ -129,12 +129,19 @@ export default function Home() {
                 <p>{etr.message}</p>
               ) : (
                 <>
-                  {Object.entries(etr).filter(([k]) => k !== 'overallNote').map(([paper, val]) => (
-                    <div key={paper}>
-                      <p className="text-lg font-semibold">You need <strong>{val.required}</strong> marks in <em>{paper}</em></p>
-                      {val.note && <p className="text-red-500 text-sm">{val.note}</p>}
-                    </div>
-                  ))}
+                  {['reading', 'writing', 'listening', 'speaking'].map((paper) => (
+  etr[paper] && (
+    <div key={paper}>
+      <p className="text-lg font-semibold">
+        You need <strong>{etr[paper].required}</strong> marks in <em>{paper}</em>
+      </p>
+      {etr[paper].note && (
+        <p className="text-red-500 text-sm">{etr[paper].note}</p>
+      )}
+    </div>
+  )
+))}
+
                   {etr.overallNote && <p className="text-red-600 font-semibold">{etr.overallNote}</p>}
                 </>
               )}
