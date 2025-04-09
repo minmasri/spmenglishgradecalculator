@@ -149,10 +149,20 @@ export default function Home() {
           )}
 
           <div className="bg-green-50 p-4 rounded-lg shadow-md mt-4 space-y-2">
-            <p><strong>Student Name:</strong> {studentName || "—"}</p>
-            <p><strong>Current Estimated Total:</strong> {score.percentage}%</p>
-            <p><strong>Estimated Grade:</strong> {score.grade}</p>
-          </div>
+  <p><strong>Student Name:</strong> {studentName || "—"}</p>
+
+  <p className="mt-2 font-semibold underline">Paper Scores:</p>
+  <ul className="ml-4 list-disc space-y-1">
+    <li>Paper 1 (Reading): {reading || "—"} / 40</li>
+    <li>Paper 2 (Writing): {writing || "—"} / 60</li>
+    <li>Paper 3 (Speaking): {speaking || "—"} / 24</li>
+    <li>Paper 4 (Listening): {listening || "—"} / 30</li>
+  </ul>
+
+  <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
+  <p><strong>Estimated Grade:</strong> {score.grade}</p>
+</div>
+
         </div>
 
         <div className="space-y-4">
