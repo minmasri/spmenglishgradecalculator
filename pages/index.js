@@ -156,11 +156,63 @@ export default function Home() {
         </div>
 
         <div className="space-y-4">
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 1 (Reading) /40" type="number" value={reading} onChange={(e) => setReading(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 2 (Writing) /60" type="number" value={writing} onChange={(e) => setWriting(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 3 (Speaking) /24" type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} />
-          <input className="w-full p-2 border rounded shadow-sm" placeholder="Paper 4 (Listening) /30" type="number" value={listening} onChange={(e) => setListening(e.target.value)} />
-        </div>
+  {/* Paper 1 – Reading */}
+  <div className="relative">
+    <input
+      type="number"
+      value={reading}
+      onChange={(e) => setReading(e.target.value)}
+      className="w-full p-2 pr-40 border rounded shadow-sm"
+      placeholder="Enter marks"
+    />
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+      Paper 1 (Reading) /40
+    </span>
+  </div>
+
+  {/* Paper 2 – Writing */}
+  <div className="relative">
+    <input
+      type="number"
+      value={writing}
+      onChange={(e) => setWriting(e.target.value)}
+      className="w-full p-2 pr-40 border rounded shadow-sm"
+      placeholder="Enter marks"
+    />
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+      Paper 2 (Writing) /60
+    </span>
+  </div>
+
+  {/* Paper 3 – Speaking */}
+  <div className="relative">
+    <input
+      type="number"
+      value={speaking}
+      onChange={(e) => setSpeaking(e.target.value)}
+      className="w-full p-2 pr-40 border rounded shadow-sm"
+      placeholder="Enter marks"
+    />
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+      Paper 3 (Speaking) /24
+    </span>
+  </div>
+
+  {/* Paper 4 – Listening */}
+  <div className="relative">
+    <input
+      type="number"
+      value={listening}
+      onChange={(e) => setListening(e.target.value)}
+      className="w-full p-2 pr-40 border rounded shadow-sm"
+      placeholder="Enter marks"
+    />
+    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+      Paper 4 (Listening) /30
+    </span>
+  </div>
+</div>
+
 
         <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm">
           <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
