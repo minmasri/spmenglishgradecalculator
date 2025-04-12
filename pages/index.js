@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 
 export default function Home() {
@@ -55,6 +54,7 @@ export default function Home() {
     const targetScore = Number(target);
     const current = calculate();
     const scores = { writing, reading, listening, speaking };
+    const paperNotes = {};
 
     const remainingPapers = [];
     if (!writing) remainingPapers.push('writing');
@@ -62,11 +62,7 @@ export default function Home() {
     if (!listening) remainingPapers.push('listening');
     if (!speaking) remainingPapers.push('speaking');
 
-    
-    
-    
     if (remainingPapers.length === 0) {
-      const paperNotes = {};
       const results = {};
       Object.entries(scores).forEach(([paper, val]) => {
         const actualScore = Number(val);
@@ -93,70 +89,6 @@ export default function Home() {
       results.paperNotes = paperNotes;
       results.overallNote = `⛔ You can no longer reach ${targetScore}%. But you can still aim for your personal best.`;
       return results;
-    }
-    ;
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const weight = weights[paper];
-        const neededPercent = targetScore * weight;
-        const neededMarks = (neededPercent / 100) * max;
-
-        results[paper] = {
-          required: neededMarks.toFixed(1),
-          actual: actualScore
-        };
-
-        const percent = (actualScore / max) * 100;
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
-        } else {
-          paperNotes[paper] = "✅ On track";
-        }
-      });
-      return { paperNotes, ...results };
-    }
-    ;
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const percent = (actualScore / max) * 100;
-
-        // Estimate what would have been needed for target
-        const neededPercent = targetScore * weights[paper];
-        const neededMarks = (neededPercent / 100) * max;
-
-        results[paper] = {
-          required: neededMarks.toFixed(1),
-          actual: actualScore
-        };
-
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
-        } else {
-          paperNotes[paper] = "✅ On track";
-        }
-      });
-      return { paperNotes, ...results };
-    }
-    ;
-      Object.entries(scores).forEach(([paper, val]) => {
-        const percent = (Number(val) / maxMarks[paper]) * 100;
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
-        } else {
-          paperNotes[paper] = "✅ On track";
-        }
-      });
-      return { paperNotes };
     }
 
     const remaining = targetScore - current.percentage;
@@ -216,7 +148,6 @@ export default function Home() {
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Target (ETR %)</span>
         </div>
 
-        
         {etr && (
           <div className="bg-blue-50 p-4 rounded-lg shadow-md space-y-2">
             <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
@@ -225,7 +156,8 @@ export default function Home() {
                 {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
                   <p key={paper}>
                     {etr.paperNotes[paper]} in <em>{paper}</em> ({Number(scores[paper]) || 0} / {etr[paper]?.required || '—'} needed)
-                  </p>); })}
+                  </p>
+                ))}
               </>
             ) : (
               <>
@@ -253,7 +185,6 @@ export default function Home() {
             )}
           </div>
         )}
-
 
         <div className="space-y-4">
           {[
@@ -289,8 +220,7 @@ export default function Home() {
             </ul>
             <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
-          
-        </div>
+          </div>
         </div>
 
         <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm">
@@ -298,27 +228,16 @@ export default function Home() {
           <p className="font-semibold">Nur Syahmin Alya Masri</p>
           <p>PPPDG10</p>
           <p>📧 <a className="text-blue-600 hover:underline" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
-  <div className="mt-4">
-    <a
-      href="https://forms.gle/H6gvWFeAwQCwY9LK7"
-      target="_blank"
-      rel="noopener noreferrer"
-      className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded text-sm"
-    >
-      📋 Give Feedback
-    </a>
-  </div>
-
-        
-          <a
-            href="https://forms.gle/H6gvWFeAwQCwY9LK7"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded mt-2 text-sm text-center print:hidden"
-          >
-            📋 Give Feedback
-          </a>
-
+          <div className="mt-4">
+            <a
+              href="https://forms.gle/H6gvWFeAwQCwY9LK7"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded text-sm"
+            >
+              📋 Give Feedback
+            </a>
+          </div>
         </footer>
       </div>
     </div>
