@@ -63,8 +63,34 @@ export default function Home() {
     if (!speaking) remainingPapers.push('speaking');
 
     
+    
     if (remainingPapers.length === 0) {
       const paperNotes = {};
+      const results = {};
+      Object.entries(scores).forEach(([paper, val]) => {
+        const actualScore = Number(val);
+        const max = maxMarks[paper];
+        const weight = weights[paper];
+        const neededPercent = targetScore * weight;
+        const neededMarks = (neededPercent / 100) * max;
+
+        results[paper] = {
+          required: neededMarks.toFixed(1),
+          actual: actualScore
+        };
+
+        const percent = (actualScore / max) * 100;
+        if (percent < 60) {
+          paperNotes[paper] = "🔴 Far from target";
+        } else if (percent < 80) {
+          paperNotes[paper] = "🟠 Needs improvement";
+        } else {
+          paperNotes[paper] = "✅ On track";
+        }
+      });
+      return { paperNotes, ...results };
+    }
+    ;
       const results = {};
       Object.entries(scores).forEach(([paper, val]) => {
         const actualScore = Number(val);
