@@ -53,66 +53,41 @@ export default function Home() {
   const getETR = () => {
     const targetScore = Number(target);
     const current = calculate();
+    const totalScore = Number(current.percentage);
     const scores = { writing, reading, listening, speaking };
     const paperNotes = {};
 
-    const remainingPapers = [];
-    if (!writing) remainingPapers.push('writing');
-    if (!reading) remainingPapers.push('reading');
-    if (!listening) remainingPapers.push('listening');
-    if (!speaking) remainingPapers.push('speaking');
+    const totalReachedTarget = totalScore >= targetScore;
+    
+    Object.entries(scores).forEach(([paper, val]) => {
+      const actual = Number(val) || 0;
+      const max = maxMarks[paper];
+      const weight = weights[paper];
+      const required = (targetScore / 100) * max * weight * 100 / (weight * 100);
+      const diff = required - actual;
 
-    if (remainingPapers.length === 0) {
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const weight = weights[paper];
-        const neededPercent = targetScore * weight;
-        const neededMarks = (neededPercent / 100) * max;
-
-        results[paper] = {
-          required: neededMarks.toFixed(1),
-          actual: actualScore
-        };
-
-        const percent = (actualScore / max) * 100;
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
+      // Format notes
+      if (totalReachedTarget) {
+        paperNotes[paper] = `✅ On track (${actual} / ${max})`;
+      } else {
+        if (actual === 0) {
+          paperNotes[paper] = `⚪ Not taken (need ${required.toFixed(1)})`;
+        } else if (diff > max * 0.3) {
+          paperNotes[paper] = `🔴 Far from target (${actual} / ${required.toFixed(1)})`;
+        } else if (diff > max * 0.1) {
+          paperNotes[paper] = `🟠 Needs improvement (${actual} / ${required.toFixed(1)})`;
         } else {
-          paperNotes[paper] = "✅ On track";
+          paperNotes[paper] = `🟢 Close to target (${actual} / ${required.toFixed(1)})`;
         }
-      });
-
-      results.paperNotes = paperNotes;
-      results.overallNote = `⛔ You can no longer reach ${targetScore}%. But you can still aim for your personal best.`;
-      return results;
-    }
-
-    const remaining = targetScore - current.percentage;
-    const neededPerPaper = (remaining / remainingPapers.length) / 0.25;
-    const results = {};
-    let impossible = false;
-
-    remainingPapers.forEach(paper => {
-      const raw = (neededPerPaper / 100) * maxMarks[paper];
-      const capped = Math.min(raw, maxMarks[paper]);
-      results[paper] = {
-        required: capped.toFixed(1),
-        note: raw > maxMarks[paper]
-          ? `⚠️ Max for ${paper} is ${maxMarks[paper]}. Give it your best shot!`
-          : null
-      };
-      if (raw > maxMarks[paper]) impossible = true;
+      }
     });
 
-    if (impossible) {
-      results.overallNote = `🚫 You can no longer reach ${targetScore}%. But you can still aim for your personal best! 💪`;
-    }
-
-    return results;
+    return {
+      paperNotes,
+      overallNote: totalReachedTarget 
+        ? `🎉 You've reached your target of ${targetScore}%!`
+        : `You need ${(targetScore - totalScore).toFixed(1)}% more to reach your target`
+    };
   };
 
   const resetAll = () => {
@@ -149,38 +124,24 @@ export default function Home() {
         </div>
 
         {etr && (
-          <div className="bg-blue-50 p-4 rounded-lg shadow-md space-y-2">
-            <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
-            {'paperNotes' in etr ? (
-              <>
-                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                  <p key={paper}>
-                    {etr.paperNotes[paper]} in <em>{paper}</em> ({Number(scores[paper]) || 0} / {etr[paper]?.required || '—'} needed)
-                  </p>
-                ))}
-              </>
-            ) : (
-              <>
-                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                  etr[paper] && (
-                    <div key={paper}>
-                      <p className="text-lg font-semibold">
-                        You need <strong>{etr[paper].required}</strong> marks in <em>{paper}</em>
-                      </p>
-                      {etr[paper].note && (
-                        <p className="text-red-500 text-sm">{etr[paper].note}</p>
-                      )}
-                    </div>
-                  )
-                ))}
-                {etr.overallNote && <p className="text-red-600 font-semibold">{etr.overallNote}</p>}
-              </>
-            )}
-            {score.percentage >= Number(target) ? (
-              <p className="text-green-600 font-bold text-lg mt-2">🏆 You have reached your target!</p>
-            ) : (
-              <div className="w-full bg-gray-200 rounded-full h-4 mt-4">
-                <div className="bg-green-500 h-4 rounded-full transition-all" style={{ width: `${score.percentage}%` }}></div>
+          <div className="bg-blue-50 print:bg-blue-50 p-4 rounded-lg print:rounded-lg shadow-md print:shadow-md space-y-2 print:block">
+            <p className="font-semibold text-blue-900 print:text-blue-900">ETR — To Reach {target}%</p>
+            {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
+              <p key={paper} className="print:text-black">
+                {etr.paperNotes[paper]} in <span className="font-medium capitalize">{paper}</span>
+              </p>
+            ))}
+            <p className={`mt-2 font-semibold ${
+              score.percentage >= Number(target) ? 'text-green-600 print:text-green-600' : 'text-blue-600 print:text-blue-600'
+            }`}>
+              {etr.overallNote}
+            </p>
+            {score.percentage < Number(target) && (
+              <div className="w-full bg-gray-200 rounded-full h-4 mt-4 print:block">
+                <div 
+                  className="bg-green-500 h-4 rounded-full transition-all print:bg-green-500" 
+                  style={{ width: `${Math.min(score.percentage, 100)}%` }}
+                ></div>
               </div>
             )}
           </div>
@@ -200,6 +161,8 @@ export default function Home() {
                 onChange={(e) => setValue(e.target.value)}
                 className="w-full p-2 pr-40 border rounded shadow-sm"
                 placeholder="Enter marks"
+                max={max}
+                min={0}
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
                 {label} /{max}
@@ -220,10 +183,21 @@ export default function Home() {
             </ul>
             <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
+            {etr && (
+              <>
+                <p className="mt-2 font-semibold underline">ETR Analysis:</p>
+                <ul className="ml-4 list-disc space-y-1">
+                  {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
+                    <li key={paper} className="capitalize">{paper}: {etr.paperNotes[paper]}</li>
+                  ))}
+                </ul>
+                <p className="mt-2 font-semibold">{etr.overallNote}</p>
+              </>
+            )}
           </div>
         </div>
 
-        <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm">
+        <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm print:hidden">
           <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
           <p className="font-semibold">Nur Syahmin Alya Masri</p>
           <p>PPPDG10</p>
