@@ -216,16 +216,6 @@ export default function Home() {
     </a>
   </div>
 
-        
-          <a
-            href="https://forms.gle/H6gvWFeAwQCwY9LK7"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded mt-2 text-sm text-center print:hidden"
-          >
-            📋 Give Feedback
-          </a>
-
         </footer>
       </div>
     </div>
