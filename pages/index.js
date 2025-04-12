@@ -62,61 +62,8 @@ export default function Home() {
     if (!listening) remainingPapers.push('listening');
     if (!speaking) remainingPapers.push('speaking');
 
-    
-    
     if (remainingPapers.length === 0) {
       const paperNotes = {};
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const weight = weights[paper];
-        const neededPercent = targetScore * weight;
-        const neededMarks = (neededPercent / 100) * max;
-
-        results[paper] = {
-          required: neededMarks.toFixed(1),
-          actual: actualScore
-        };
-
-        const percent = (actualScore / max) * 100;
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
-        } else {
-          paperNotes[paper] = "✅ On track";
-        }
-      });
-      return { paperNotes, ...results };
-    }
-    ;
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const percent = (actualScore / max) * 100;
-
-        // Estimate what would have been needed for target
-        const neededPercent = targetScore * weights[paper];
-        const neededMarks = (neededPercent / 100) * max;
-
-        results[paper] = {
-          required: neededMarks.toFixed(1),
-          actual: actualScore
-        };
-
-        if (percent < 60) {
-          paperNotes[paper] = "🔴 Far from target";
-        } else if (percent < 80) {
-          paperNotes[paper] = "🟠 Needs improvement";
-        } else {
-          paperNotes[paper] = "✅ On track";
-        }
-      });
-      return { paperNotes, ...results };
-    }
-    ;
       Object.entries(scores).forEach(([paper, val]) => {
         const percent = (Number(val) / maxMarks[paper]) * 100;
         if (percent < 60) {
@@ -164,7 +111,6 @@ export default function Home() {
   };
 
   const score = calculate();
-  const scores = { writing, reading, listening, speaking };
   const etr = target ? getETR() : null;
 
   return (
@@ -187,16 +133,14 @@ export default function Home() {
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Target (ETR %)</span>
         </div>
 
-        
         {etr && (
           <div className="bg-blue-50 p-4 rounded-lg shadow-md space-y-2">
             <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
             {'paperNotes' in etr ? (
               <>
-                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                  <p key={paper}>
-                    {etr.paperNotes[paper]} in <em>{paper}</em> ({Number(scores[paper]) || 0} / {etr[paper]?.required || '—'} needed)
-                  </p>); })}
+                {Object.entries(etr.paperNotes).map(([paper, note]) => (
+                  <p key={paper}>{note} in <em>{paper}</em></p>
+                ))}
               </>
             ) : (
               <>
@@ -215,16 +159,8 @@ export default function Home() {
                 {etr.overallNote && <p className="text-red-600 font-semibold">{etr.overallNote}</p>}
               </>
             )}
-            {score.percentage >= Number(target) ? (
-              <p className="text-green-600 font-bold text-lg mt-2">🏆 You have reached your target!</p>
-            ) : (
-              <div className="w-full bg-gray-200 rounded-full h-4 mt-4">
-                <div className="bg-green-500 h-4 rounded-full transition-all" style={{ width: `${score.percentage}%` }}></div>
-              </div>
-            )}
           </div>
         )}
-
 
         <div className="space-y-4">
           {[
