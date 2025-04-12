@@ -107,7 +107,7 @@ export default function Home() {
     <div className="min-h-screen bg-gray-100 text-gray-900 p-6 print:bg-white print:text-black">
       <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
         <div className="flex justify-between items-center space-x-2">
-          <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Estimator</h1>
+          <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Calculator</h1>
           <div className="flex space-x-2">
             <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset All</button>
             <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print Report</button>
