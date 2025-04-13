@@ -1,5 +1,5 @@
-import Head from 'next/head';
 import { useState } from 'react';
+import Head from 'next/head';
 
 export default function Home() {
   const [writing, setWriting] = useState('');
@@ -52,40 +52,47 @@ export default function Home() {
   };
 
   const getETR = () => {
-    const targetScore = Number(target);
-    const current = calculate();
     const scores = { writing, reading, listening, speaking };
     const results = {};
-    let totalNeeded = 0;
+    const notes = {};
+    let currentTotal = 0;
+    let targetTotal = Number(target);
 
-    Object.entries(maxMarks).forEach(([paper, max]) => {
-      const actual = Number(scores[paper]);
-      const needed = (targetScore * weights[paper] * max) / 100;
-      const status = !actual
-        ? '⚪ Not taken'
-        : actual >= needed
-        ? '🟢 On track'
-        : actual >= needed * 0.85
-        ? '🟢 Close to target'
-        : actual >= needed * 0.6
-        ? '🟠 Needs improvement'
-        : '🔴 Far from target';
+    let completedWeight = 0;
 
-      results[paper] = {
-        status,
-        actual: actual || '—',
-        required: needed.toFixed(1)
-      };
+    Object.entries(scores).forEach(([paper, val]) => {
+      const actual = Number(val);
+      const max = maxMarks[paper];
+      const weight = weights[paper];
+      const needed = (targetTotal * weight) / 100 * max;
 
-      if (!actual) totalNeeded += needed;
+      if (val) {
+        const percent = (actual / max) * 100;
+        completedWeight += weight;
+        currentTotal += (actual / max) * weight * 100;
+
+        if (actual >= needed) {
+          notes[paper] = `🟢 On track (${actual} / ${needed.toFixed(1)} needed)`;
+        } else {
+          notes[paper] = `🟠 Close to target (${actual} / ${needed.toFixed(1)} needed)`;
+        }
+      } else {
+        notes[paper] = `⚪ Not taken (— / ${needed.toFixed(1)} needed)`;
+      }
+
+      results[paper] = { required: needed.toFixed(1), actual: val || "—" };
     });
 
+    const difference = targetTotal - currentTotal;
+    const requiredPct = ((difference / targetTotal) * 100).toFixed(1);
+
+    results.notes = notes;
+    results.remaining = difference;
+    results.progress = ((currentTotal / targetTotal) * 100).toFixed(1);
     results.overallNote =
-      totalNeeded > 0
-        ? `🔵 You need ${(totalNeeded / Object.values(maxMarks).reduce((a, b) => a + b) * 100).toFixed(1)}% more to reach your target`
-        : current.percentage >= targetScore
+      currentTotal >= targetTotal
         ? `🏆 You have reached your target!`
-        : `⛔ You can no longer reach ${targetScore}%. But you can still aim for your personal best! 💪`;
+        : `🔵 You need ${requiredPct}% more to reach your target`;
 
     return results;
   };
@@ -99,21 +106,19 @@ export default function Home() {
     setTarget('');
   };
 
-  const score = calculate();
   const scores = { writing, reading, listening, speaking };
+  const score = calculate();
   const etr = target ? getETR() : null;
 
   return (
     <>
       <Head>
         <title>SPM CEFR English Grade Calculator</title>
-        <meta name="description" content="Estimate your SPM English grade and set your ETR target." />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className="min-h-screen bg-gray-100 text-gray-900 p-6 print:bg-white print:text-black">
         <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
-
           <div className="flex justify-between items-center space-x-2">
             <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Calculator</h1>
             <div className="flex space-x-2">
@@ -123,22 +128,23 @@ export default function Home() {
           </div>
 
           <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
-          <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} className="p-2 border rounded w-full" placeholder="Target (ETR %)" />
+
+          <div className="relative">
+            <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} className="w-full p-2 pr-40 border rounded shadow-sm" placeholder="Enter target %" />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Target (ETR %)</span>
+          </div>
 
           {etr && (
-            <div className="bg-blue-50 p-4 rounded-lg shadow space-y-2">
-              <p className="font-semibold text-blue-900">ETR — To Reach {target}%</p>
-              {Object.entries(etr).map(([paper, info]) => {
-                if (paper === 'overallNote') return null;
-                return (
-                  <p key={paper} className="text-sm">
-                    {info.status} ({info.actual} / {info.required} needed) in <em>{paper}</em>
-                  </p>
-                );
-              })}
-              <p className="text-blue-700 font-semibold mt-2">{etr.overallNote}</p>
-              <div className="w-full bg-gray-200 rounded-full h-4">
-                <div className="bg-green-500 h-4 rounded-full transition-all" style={{ width: `${score.percentage}%` }}></div>
+            <div className="bg-blue-50 print:bg-blue-50 p-4 rounded-lg print:rounded-lg shadow-md print:shadow-md space-y-2 print:block">
+              <p className="font-semibold text-blue-900 print:text-blue-900">ETR — To Reach {target}%</p>
+              {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
+                <p key={paper} className="print:text-black">{etr.notes[paper]}</p>
+              ))}
+              <p className={`mt-2 font-semibold ${score.percentage >= target ? 'text-green-600' : 'text-blue-700'} print:text-black`}>
+                {etr.overallNote}
+              </p>
+              <div className="w-full bg-gray-200 rounded-full h-4 mt-2 print:block">
+                <div className="bg-green-500 h-4 rounded-full" style={{ width: `${etr.progress}%` }}></div>
               </div>
             </div>
           )}
@@ -157,7 +163,9 @@ export default function Home() {
                 className="w-full p-2 pr-40 border rounded shadow-sm"
                 placeholder="Enter marks"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">{label} /{max}</span>
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                {label} /{max}
+              </span>
             </div>
           ))}
 
@@ -178,8 +186,8 @@ export default function Home() {
 
           <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm print:hidden">
             <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
-            <p className="font-semibold">Nur Syahmin Alya Masri</p>
-            <p>PPPDG10</p>
+            <p className="font-semibold">Nur Syahmin Alya Masri PPPDG10</p>
+            <p>SMK AGAMA KUALA LIPIS</p>
             <p>📧 <a className="text-blue-600 hover:underline" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
             <div className="mt-4">
               <a
@@ -192,7 +200,6 @@ export default function Home() {
               </a>
             </div>
           </footer>
-
         </div>
       </div>
     </>
