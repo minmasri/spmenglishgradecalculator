@@ -159,6 +159,17 @@ export default function Home() {
           </div>
 
           <div className="bg-green-50 p-4 rounded shadow print-only">
+      {etr && (
+        <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
+          <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+          {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+            <p key={paper}>
+              {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
+            </p>
+          ))}
+          <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+        </div>
+      )}
             <p><strong>Student Name:</strong> {studentName || '—'}</p>
             <p className="underline font-semibold mt-2">Paper Scores:</p>
             <ul className="list-disc pl-5 space-y-1">
