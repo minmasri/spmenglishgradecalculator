@@ -55,71 +55,51 @@ export default function Home() {
     const current = calculate();
     const scores = { writing, reading, listening, speaking };
     const paperNotes = {};
-
-    const remainingPapers = [];
-    if (!writing) remainingPapers.push('writing');
-    if (!reading) remainingPapers.push('reading');
-    if (!listening) remainingPapers.push('listening');
-    if (!speaking) remainingPapers.push('speaking');
-
-    if (remainingPapers.length === 0) {
-      const results = {};
-      Object.entries(scores).forEach(([paper, val]) => {
-        const actualScore = Number(val);
-        const max = maxMarks[paper];
-        const weight = weights[paper];
-        const required = (targetScore / 100) * max;
-
-        results[paper] = {
-          required: required.toFixed(1),
-          actual: actualScore,
-        };
-
-        if (actualScore >= required) {
-          paperNotes[paper] = `✅ On track (${actualScore} / ${required.toFixed(1)})`;
-        } else {
-          const percent = actualScore / required;
-          if (percent >= 0.9) {
-            paperNotes[paper] = `🟢 Close to target (${actualScore} / ${required.toFixed(1)})`;
-          } else if (percent >= 0.6) {
-            paperNotes[paper] = `🟡 Needs improvement (${actualScore} / ${required.toFixed(1)})`;
-          } else {
-            paperNotes[paper] = `🔴 Far from target (${actualScore} / ${required.toFixed(1)})`;
-          }
-        }
-      });
-
-      results.paperNotes = paperNotes;
-
-      const totalReachedTarget = Number(current.percentage) >= targetScore;
-      results.overallNote = totalReachedTarget
-        ? `🏆 You have reached your target!`
-        : `You need ${(targetScore - current.percentage).toFixed(1)}% more to reach your target`;
-
-      return results;
-    }
-
-    const remaining = targetScore - current.percentage;
-    const neededPerPaper = (remaining / remainingPapers.length) / 0.25;
     const results = {};
-    let impossible = false;
 
-    remainingPapers.forEach((paper) => {
-      const raw = (neededPerPaper / 100) * maxMarks[paper];
-      const capped = Math.min(raw, maxMarks[paper]);
+    let totalWeightedScore = 0;
+    let totalWeight = 0;
+    let missingWeight = 0;
+
+    Object.keys(scores).forEach((paper) => {
+      const max = maxMarks[paper];
+      const weight = weights[paper];
+      const required = (targetScore / 100) * max;
+      const actual = Number(scores[paper]);
+
       results[paper] = {
-        required: capped.toFixed(1),
-        note:
-          raw > maxMarks[paper]
-            ? `⚠️ Max for ${paper} is ${maxMarks[paper]}. Give it your best shot!`
-            : null,
+        required: required.toFixed(1),
+        actual: scores[paper] ? actual : null,
       };
-      if (raw > maxMarks[paper]) impossible = true;
+
+      if (scores[paper]) {
+        const percent = actual / required;
+        totalWeightedScore += (actual / max) * weight * 100;
+        totalWeight += weight;
+
+        if (actual >= required) {
+          paperNotes[paper] = `✅ On track (${actual} / ${required.toFixed(1)})`;
+        } else if (percent >= 0.9) {
+          paperNotes[paper] = `🟢 Close to target (${actual} / ${required.toFixed(1)})`;
+        } else if (percent >= 0.6) {
+          paperNotes[paper] = `🟡 Needs improvement (${actual} / ${required.toFixed(1)})`;
+        } else {
+          paperNotes[paper] = `🔴 Far from target (${actual} / ${required.toFixed(1)})`;
+        }
+      } else {
+        missingWeight += weight;
+        paperNotes[paper] = `⚪ Not taken (need ${required.toFixed(1)}) in ${paper.charAt(0).toUpperCase() + paper.slice(1)}`;
+      }
     });
 
-    if (impossible) {
-      results.overallNote = `🚫 You can no longer reach ${targetScore}%. But you can still aim for your personal best! 💪`;
-    }
+    results.paperNotes = paperNotes;
+
+    const maxPossible = totalWeightedScore + (missingWeight * 100);
+    const canReachTarget = maxPossible >= targetScore;
+
+    results.overallNote = canReachTarget
+      ? `You need ${(targetScore - current.percentage).toFixed(1)}% more to reach your target`
+      : `⛔ You can no longer reach ${targetScore}%. But you can still aim for your personal best! 💪`;
 
     return results;
   };
@@ -158,39 +138,14 @@ export default function Home() {
         {etr && (
           <div className="bg-blue-50 print:bg-blue-50 p-4 rounded-lg shadow-md space-y-2 print:block">
             <p className="font-semibold text-blue-900 print:text-blue-900">ETR — To Reach {target}%</p>
-            {'paperNotes' in etr ? (
-              <>
-                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                  <p key={paper} className="print:text-black">
-                    {scores[paper]
-                      ? etr.paperNotes[paper]
-                      : `⚪ Not taken (need ${etr[paper]?.required || '—'}) in ${paper.charAt(0).toUpperCase() + paper.slice(1)}`}
-                  </p>
-                ))}
-              </>
-            ) : (
-              <>
-                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                  etr[paper] && (
-                    <div key={paper} className="print:text-black">
-                      <p className="text-lg font-semibold">
-                        You need <strong>{etr[paper].required}</strong> marks in <em>{paper}</em>
-                      </p>
-                      {etr[paper].note && (
-                        <p className="text-red-500 text-sm">{etr[paper].note}</p>
-                      )}
-                    </div>
-                  )
-                ))}
-              </>
-            )}
-            {etr.overallNote && (
-              <p className={`mt-2 font-bold text-lg ${
-                etr.overallNote.includes('reached') ? 'text-green-600' : 'text-blue-600'
-              } print:text-black`}>
-                {etr.overallNote}
-              </p>
-            )}
+            {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
+              <p key={paper} className="print:text-black">{etr.paperNotes[paper]}</p>
+            ))}
+            <p className={`mt-2 font-bold text-lg ${
+              etr.overallNote.includes('reached') ? 'text-green-600' : 'text-blue-600'
+            } print:text-black`}>
+              {etr.overallNote}
+            </p>
             <div className="w-full bg-gray-200 rounded-full h-4">
               <div className="bg-green-500 h-4 rounded-full transition-all" style={{ width: `${score.percentage}%` }}></div>
             </div>
