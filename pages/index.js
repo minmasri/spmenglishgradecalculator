@@ -1,5 +1,6 @@
-import { useState } from 'react';
+
 import Head from 'next/head';
+import { useState } from 'react';
 
 export default function Home() {
   const [writing, setWriting] = useState('');
@@ -52,47 +53,41 @@ export default function Home() {
   };
 
   const getETR = () => {
+    const targetScore = Number(target);
+    const current = calculate();
     const scores = { writing, reading, listening, speaking };
+    const paperNotes = {};
     const results = {};
-    const notes = {};
-    let currentTotal = 0;
-    let targetTotal = Number(target);
-
-    let completedWeight = 0;
 
     Object.entries(scores).forEach(([paper, val]) => {
-      const actual = Number(val);
       const max = maxMarks[paper];
-      const weight = weights[paper];
-      const needed = (targetTotal * weight) / 100 * max;
+      const score = Number(val);
+      const needed = ((targetScore / 100) * max).toFixed(1);
 
-      if (val) {
-        const percent = (actual / max) * 100;
-        completedWeight += weight;
-        currentTotal += (actual / max) * weight * 100;
-
-        if (actual >= needed) {
-          notes[paper] = `🟢 On track (${actual} / ${needed.toFixed(1)} needed)`;
-        } else {
-          notes[paper] = `🟠 Close to target (${actual} / ${needed.toFixed(1)} needed)`;
-        }
+      if (!val) {
+        results[paper] = { required: needed };
+        paperNotes[paper] = `⚪ Not taken`;
       } else {
-        notes[paper] = `⚪ Not taken (— / ${needed.toFixed(1)} needed)`;
+        const neededNum = parseFloat(needed);
+        if (score >= neededNum) {
+          paperNotes[paper] = `✅ On track`;
+        } else if (score >= neededNum * 0.8) {
+          paperNotes[paper] = `🟡 Needs improvement`;
+        } else {
+          paperNotes[paper] = `🔴 Far from target`;
+        }
+        results[paper] = { actual: score, required: needed };
       }
-
-      results[paper] = { required: needed.toFixed(1), actual: val || "—" };
     });
 
-    const difference = targetTotal - currentTotal;
-    const requiredPct = ((difference / targetTotal) * 100).toFixed(1);
+    results.paperNotes = paperNotes;
 
-    results.notes = notes;
-    results.remaining = difference;
-    results.progress = ((currentTotal / targetTotal) * 100).toFixed(1);
-    results.overallNote =
-      currentTotal >= targetTotal
-        ? `🏆 You have reached your target!`
-        : `🔵 You need ${requiredPct}% more to reach your target`;
+    if (Number(current.percentage) >= targetScore) {
+      results.overallNote = `🏆 You have reached your target!`;
+    } else {
+      const remaining = targetScore - Number(current.percentage);
+      results.overallNote = `🔵 You need ${remaining.toFixed(1)}% more to reach your target`;
+    }
 
     return results;
   };
@@ -106,14 +101,15 @@ export default function Home() {
     setTarget('');
   };
 
-  const scores = { writing, reading, listening, speaking };
   const score = calculate();
+  const scores = { writing, reading, listening, speaking };
   const etr = target ? getETR() : null;
 
   return (
     <>
       <Head>
         <title>SPM CEFR English Grade Calculator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -122,83 +118,65 @@ export default function Home() {
           <div className="flex justify-between items-center space-x-2">
             <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Calculator</h1>
             <div className="flex space-x-2">
-              <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset All</button>
-              <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print Report</button>
+              <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset</button>
+              <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print</button>
             </div>
           </div>
 
           <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
-
-          <div className="relative">
-            <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} className="w-full p-2 pr-40 border rounded shadow-sm" placeholder="Enter target %" />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">Target (ETR %)</span>
-          </div>
+          <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
           {etr && (
-            <div className="bg-blue-50 print:bg-blue-50 p-4 rounded-lg print:rounded-lg shadow-md print:shadow-md space-y-2 print:block">
-              <p className="font-semibold text-blue-900 print:text-blue-900">ETR — To Reach {target}%</p>
-              {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
-                <p key={paper} className="print:text-black">{etr.notes[paper]}</p>
+            <div className="bg-blue-50 p-4 rounded shadow">
+              <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+              {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+                <p key={paper}>
+                  {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
+                </p>
               ))}
-              <p className={`mt-2 font-semibold ${score.percentage >= target ? 'text-green-600' : 'text-blue-700'} print:text-black`}>
-                {etr.overallNote}
-              </p>
-              <div className="w-full bg-gray-200 rounded-full h-4 mt-2 print:block">
-                <div className="bg-green-500 h-4 rounded-full" style={{ width: `${etr.progress}%` }}></div>
-              </div>
+              <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
             </div>
           )}
 
-          {[
-            { label: 'Paper 1 (Reading)', value: reading, setValue: setReading, max: 40 },
-            { label: 'Paper 2 (Writing)', value: writing, setValue: setWriting, max: 60 },
-            { label: 'Paper 3 (Speaking)', value: speaking, setValue: setSpeaking, max: 24 },
-            { label: 'Paper 4 (Listening)', value: listening, setValue: setListening, max: 30 }
-          ].map(({ label, value, setValue, max }) => (
-            <div className="relative" key={label}>
-              <input
-                type="number"
-                value={value}
-                onChange={(e) => setValue(e.target.value)}
-                className="w-full p-2 pr-40 border rounded shadow-sm"
-                placeholder="Enter marks"
-              />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
-                {label} /{max}
-              </span>
-            </div>
-          ))}
-
-          <div className="print-only">
-            <div className="bg-green-50 p-4 rounded-lg shadow-md mt-4 space-y-2">
-              <p><strong>Student Name:</strong> {studentName || "—"}</p>
-              <p className="mt-2 font-semibold underline">Paper Scores:</p>
-              <ul className="ml-4 list-disc space-y-1">
-                <li>Paper 1 (Reading): {reading || "—"} / 40</li>
-                <li>Paper 2 (Writing): {writing || "—"} / 60</li>
-                <li>Paper 3 (Speaking): {speaking || "—"} / 24</li>
-                <li>Paper 4 (Listening): {listening || "—"} / 30</li>
-              </ul>
-              <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
-              <p><strong>Estimated Grade:</strong> {score.grade}</p>
-            </div>
+          <div className="grid gap-4">
+            {[
+              { label: 'Paper 1 (Reading)', value: reading, setter: setReading, max: 40 },
+              { label: 'Paper 2 (Writing)', value: writing, setter: setWriting, max: 60 },
+              { label: 'Paper 3 (Speaking)', value: speaking, setter: setSpeaking, max: 24 },
+              { label: 'Paper 4 (Listening)', value: listening, setter: setListening, max: 30 }
+            ].map(({ label, value, setter, max }) => (
+              <div className="relative" key={label}>
+                <input
+                  type="number"
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className="w-full p-2 pr-32 border rounded shadow-sm"
+                  placeholder="Enter marks"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">{label} /{max}</span>
+              </div>
+            ))}
           </div>
 
-          <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm print:hidden">
-            <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
-            <p className="font-semibold">Nur Syahmin Alya Masri PPPDG10</p>
-            <p>SMK AGAMA KUALA LIPIS</p>
-            <p>📧 <a className="text-blue-600 hover:underline" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
-            <div className="mt-4">
-              <a
-                href="https://forms.gle/H6gvWFeAwQCwY9LK7"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded text-sm"
-              >
-                📋 Give Feedback
-              </a>
-            </div>
+          <div className="bg-green-50 p-4 rounded shadow print-only">
+            <p><strong>Student Name:</strong> {studentName || '—'}</p>
+            <p className="underline font-semibold mt-2">Paper Scores:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Paper 1 (Reading): {reading || '—'} / 40</li>
+              <li>Paper 2 (Writing): {writing || '—'} / 60</li>
+              <li>Paper 3 (Speaking): {speaking || '—'} / 24</li>
+              <li>Paper 4 (Listening): {listening || '—'} / 30</li>
+            </ul>
+            <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
+            <p><strong>Estimated Grade:</strong> {score.grade}</p>
+          </div>
+
+          <footer className="text-center text-sm pt-6 border-t mt-8 print:hidden">
+            <p className="font-semibold">👩🏻‍🏫 Created by Nur Syahmin Alya Masri</p>
+            <p>📧 <a href="mailto:n.syahminalya@gmail.com" className="text-blue-600 underline">n.syahminalya@gmail.com</a></p>
+            <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block bg-yellow-500 text-white px-4 py-2 rounded">
+              📋 Give Feedback
+            </a>
           </footer>
         </div>
       </div>
