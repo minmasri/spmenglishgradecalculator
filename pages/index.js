@@ -57,70 +57,58 @@ export default function Home() {
     const paperNotes = {};
     const results = {};
 
-    let currentTotal = 0;
+    let currentPercentage = 0;
     let totalWeightUsed = 0;
-    const remainingPapers = [];
 
-    Object.entries(scores).forEach(([paper, val]) => {
-      const score = Number(val);
+    Object.entries(scores).forEach(([paper, value]) => {
+      const score = Number(value);
       const max = maxMarks[paper];
       const weight = weights[paper];
 
-      if (val) {
-        const contribution = (score / max) * weight * 100;
-        currentTotal += contribution;
+      if (value) {
+        const percent = (score / max) * weight * 100;
+        currentPercentage += percent;
         totalWeightUsed += weight;
-      } else {
-        remainingPapers.push(paper);
       }
     });
 
-    const remainingTarget = targetScore - currentTotal;
     const remainingWeight = 1 - totalWeightUsed;
+    const remainingTarget = targetScore - currentPercentage;
+    const neededPerWeight = remainingWeight > 0 ? remainingTarget / remainingWeight : 0;
 
-    if (remainingPapers.length === 0) {
-      results.overallNote = currentTotal >= targetScore
-        ? "🏆 You have reached your target!"
-        : `⛔ You can no longer reach ${targetScore}%. But you can still aim for your personal best.`;
-    }
-
-    remainingPapers.forEach(paper => {
+    Object.entries(scores).forEach(([paper, value]) => {
       const max = maxMarks[paper];
       const weight = weights[paper];
+      const requiredRaw = (targetScore / 100) * max;
+      const actualRaw = value ? Number(value) : null;
 
-      const neededPercentage = (remainingTarget * weight) / remainingWeight;
-      const neededMark = (neededPercentage / 100) * max;
-      results[paper] = {
-        required: neededMark.toFixed(1)
-      };
-      paperNotes[paper] = `🧮 Estimated required: ${neededMark.toFixed(1)}`;
-    });
-
-    Object.entries(scores).forEach(([paper, val]) => {
-      const max = maxMarks[paper];
-      if (val) {
-        const score = Number(val);
-        const targetMark = (targetScore / 100) * max;
-        if (score >= targetMark) {
-          paperNotes[paper] = `✅ On track`;
-        } else if (score >= targetMark * 0.8) {
-          paperNotes[paper] = `🟡 Needs improvement`;
+      if (value) {
+        if (actualRaw >= requiredRaw) {
+          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
+        } else if (actualRaw >= requiredRaw * 0.8) {
+          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
         } else {
-          paperNotes[paper] = `🔴 Far from target`;
+          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
         }
-        results[paper] = { ...results[paper], actual: score, required: targetMark.toFixed(1) };
+      } else {
+        const estimatedRaw = (neededPerWeight / 100) * max;
+        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed)`;
       }
+
+      results[paper] = {
+        actual: value ? Number(value) : null,
+        required: value ? requiredRaw.toFixed(1) : ((neededPerWeight / 100) * max).toFixed(1)
+      };
     });
 
+    const progress = Math.min((currentPercentage / targetScore) * 100, 100);
     results.paperNotes = paperNotes;
 
-    const current = calculate();
-    if (current.percentage >= targetScore) {
-      results.overallNote = `🏆 You have reached your target!`;
-    } else {
-      const diff = targetScore - current.percentage;
-      results.overallNote = `🔵 You need ${diff.toFixed(1)}% more to reach your target`;
-    }
+    results.overallNote = currentPercentage >= targetScore
+      ? `🏆 You have reached your target!`
+      : `🔵 You need ${(targetScore - currentPercentage).toFixed(1)}% more to reach your target`;
+
+    results.progress = progress;
 
     return results;
   };
@@ -160,12 +148,10 @@ export default function Home() {
           <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
           {etr && (
-            <div className="bg-blue-50 p-4 rounded shadow print:hidden">
+            <div className="bg-blue-50 p-4 rounded shadow">
               <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
               {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-                <p key={paper}>
-                  {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
-                </p>
+                <p key={paper}>{etr.paperNotes[paper]}</p>
               ))}
               <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
             </div>
@@ -191,16 +177,14 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="bg-green-50 p-4 rounded shadow hidden print:block">
+          <div className="bg-green-50 p-4 rounded shadow print-only">
             {etr && (
-              <div className="bg-green-100 border border-green-300 p-4 rounded mb-4">
-                <p className="font-bold text-green-800">ETR — To Reach {target}%</p>
+              <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
+                <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
                 {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-                  <p key={paper}>
-                    {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
-                  </p>
+                  <p key={paper}>{etr.paperNotes[paper]}</p>
                 ))}
-                <p className="mt-2 font-bold text-green-700">{etr.overallNote}</p>
+                <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
               </div>
             )}
             <p><strong>Student Name:</strong> {studentName || '—'}</p>
