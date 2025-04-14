@@ -1,4 +1,3 @@
-
 import Head from 'next/head';
 import { useState } from 'react';
 
@@ -54,41 +53,39 @@ export default function Home() {
 
   const getETR = () => {
     const targetScore = Number(target);
-    const current = calculate();
     const scores = { writing, reading, listening, speaking };
-    const paperNotes = {};
+    const current = calculate();
     const results = {};
+    let totalWeighted = 0;
 
-    Object.entries(scores).forEach(([paper, val]) => {
-      const max = maxMarks[paper];
+    Object.entries(scores).forEach(([key, val]) => {
       const score = Number(val);
-      const needed = ((targetScore / 100) * max).toFixed(1);
+      const max = maxMarks[key];
+      const weight = weights[key];
+      const needed = ((targetScore * weight) / 100) * max;
+
+      results[key] = {
+        actual: val ? score : null,
+        needed: needed.toFixed(1)
+      };
 
       if (!val) {
-        results[paper] = { required: needed };
-        paperNotes[paper] = `⚪ Not taken`;
+        results[key].status = 'not-taken';
+      } else if (score >= needed) {
+        results[key].status = 'on-track';
+      } else if (score >= needed * 0.8) {
+        results[key].status = 'needs-improvement';
       } else {
-        const neededNum = parseFloat(needed);
-        if (score >= neededNum) {
-          paperNotes[paper] = `✅ On track`;
-        } else if (score >= neededNum * 0.8) {
-          paperNotes[paper] = `🟡 Needs improvement`;
-        } else {
-          paperNotes[paper] = `🔴 Far from target`;
-        }
-        results[paper] = { actual: score, required: needed };
+        results[key].status = 'far';
+      }
+
+      if (val) {
+        totalWeighted += ((score / max) * weight * 100);
       }
     });
 
-    results.paperNotes = paperNotes;
-
-    if (Number(current.percentage) >= targetScore) {
-      results.overallNote = `🏆 You have reached your target!`;
-    } else {
-      const remaining = targetScore - Number(current.percentage);
-      results.overallNote = `🔵 You need ${remaining.toFixed(1)}% more to reach your target`;
-    }
-
+    results.total = totalWeighted.toFixed(2);
+    results.remaining = Math.max(0, (targetScore - totalWeighted)).toFixed(1);
     return results;
   };
 
@@ -102,92 +99,133 @@ export default function Home() {
   };
 
   const score = calculate();
-  const scores = { writing, reading, listening, speaking };
   const etr = target ? getETR() : null;
+
+  const statusEmoji = {
+    'on-track': '✅',
+    'needs-improvement': '🟡',
+    'far': '🔴',
+    'not-taken': '⚪'
+  };
+
+  const labelText = {
+    'on-track': 'On track',
+    'needs-improvement': 'Needs improvement',
+    'far': 'Far from target',
+    'not-taken': 'Not taken'
+  };
 
   return (
     <>
       <Head>
         <title>SPM CEFR English Grade Calculator</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
       <div className="min-h-screen bg-gray-100 text-gray-900 p-6 print:bg-white print:text-black">
         <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
-          <div className="flex justify-between items-center space-x-2">
-            <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Calculator</h1>
-            <div className="flex space-x-2">
+
+          <div className="flex justify-between items-center">
+            <h1 className="text-lg font-semibold">🎯 SPM CEFR English Grade Calculator</h1>
+            <div className="space-x-2">
               <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset</button>
               <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print</button>
             </div>
           </div>
 
-          <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
-          <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
+          <input
+            type="text"
+            className="p-2 border rounded w-full"
+            placeholder="Student Name"
+            value={studentName}
+            onChange={(e) => setStudentName(e.target.value)}
+          />
 
+          <input
+            type="number"
+            className="p-2 border rounded w-full"
+            placeholder="Target ETR %"
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+          />
+
+          {/* ETR SCREEN VIEW */}
           {etr && (
-            <div className="bg-blue-50 p-4 rounded shadow">
-              <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-              {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+            <div className="bg-blue-50 p-4 rounded print:hidden">
+              <p className="font-bold text-blue-800 mb-2">ETR — To Reach {target}%</p>
+              {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
                 <p key={paper}>
-                  {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
+                  {statusEmoji[etr[paper].status]} {labelText[etr[paper].status]} (
+                  {etr[paper].actual ?? '—'} / {etr[paper].needed}) in <em>{paper}</em>
                 </p>
               ))}
-              <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+              <p className="mt-2 font-semibold text-blue-600">🔵 You need {etr.remaining}% more to reach your target</p>
             </div>
           )}
 
-          <div className="grid gap-4">
-            {[
-              { label: 'Paper 1 (Reading)', value: reading, setter: setReading, max: 40 },
-              { label: 'Paper 2 (Writing)', value: writing, setter: setWriting, max: 60 },
-              { label: 'Paper 3 (Speaking)', value: speaking, setter: setSpeaking, max: 24 },
-              { label: 'Paper 4 (Listening)', value: listening, setter: setListening, max: 30 }
-            ].map(({ label, value, setter, max }) => (
-              <div className="relative" key={label}>
-                <input
-                  type="number"
-                  value={value}
-                  onChange={(e) => setter(e.target.value)}
-                  className="w-full p-2 pr-32 border rounded shadow-sm"
-                  placeholder="Enter marks"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">{label} /{max}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="bg-green-50 p-4 rounded shadow print-only">
-      {etr && (
-        <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
-          <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-          {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-            <p key={paper}>
-              {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
-            </p>
+          {/* Paper Input Fields */}
+          {[
+            { label: 'Paper 1 (Reading)', value: reading, setValue: setReading, max: 40 },
+            { label: 'Paper 2 (Writing)', value: writing, setValue: setWriting, max: 60 },
+            { label: 'Paper 3 (Speaking)', value: speaking, setValue: setSpeaking, max: 24 },
+            { label: 'Paper 4 (Listening)', value: listening, setValue: setListening, max: 30 }
+          ].map(({ label, value, setValue, max }) => (
+            <div className="relative" key={label}>
+              <input
+                type="number"
+                value={value}
+                onChange={(e) => setValue(e.target.value)}
+                className="w-full p-2 pr-40 border rounded shadow-sm"
+                placeholder="Enter marks"
+              />
+              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">
+                {label} /{max}
+              </span>
+            </div>
           ))}
-          <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
-        </div>
-      )}
-            <p><strong>Student Name:</strong> {studentName || '—'}</p>
-            <p className="underline font-semibold mt-2">Paper Scores:</p>
-            <ul className="list-disc pl-5 space-y-1">
-              <li>Paper 1 (Reading): {reading || '—'} / 40</li>
-              <li>Paper 2 (Writing): {writing || '—'} / 60</li>
-              <li>Paper 3 (Speaking): {speaking || '—'} / 24</li>
-              <li>Paper 4 (Listening): {listening || '—'} / 30</li>
-            </ul>
-            <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
-            <p><strong>Estimated Grade:</strong> {score.grade}</p>
-          </div>
 
-          <footer className="text-center text-sm pt-6 border-t mt-8 print:hidden">
-            <p className="font-semibold">👩🏻‍🏫 Created by Nur Syahmin Alya Masri</p>
-            <p>📧 <a href="mailto:n.syahminalya@gmail.com" className="text-blue-600 underline">n.syahminalya@gmail.com</a></p>
-            <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block bg-yellow-500 text-white px-4 py-2 rounded">
-              📋 Give Feedback
-            </a>
+          {/* PRINT BOX */}
+          {etr && (
+            <div className="bg-green-50 p-4 rounded print:block hidden shadow-md">
+              <div className="bg-blue-100 p-4 rounded mb-3">
+                <p className="font-bold text-blue-800 mb-2">ETR — To Reach {target}%</p>
+                {['reading', 'writing', 'speaking', 'listening'].map((paper) => (
+                  <p key={paper}>
+                    {statusEmoji[etr[paper].status]} {labelText[etr[paper].status]} (
+                    {etr[paper].actual ?? '—'} / {etr[paper].needed}) in <em>{paper}</em>
+                  </p>
+                ))}
+                <p className="mt-2 font-semibold text-blue-700">🔵 You need {etr.remaining}% more to reach your target</p>
+              </div>
+
+              <p><strong>Student Name:</strong> {studentName || "—"}</p>
+              <p className="mt-2 font-semibold underline">Paper Scores:</p>
+              <ul className="ml-4 list-disc">
+                <li>Paper 1 (Reading): {reading || "—"} / 40</li>
+                <li>Paper 2 (Writing): {writing || "—"} / 60</li>
+                <li>Paper 3 (Speaking): {speaking || "—"} / 24</li>
+                <li>Paper 4 (Listening): {listening || "—"} / 30</li>
+              </ul>
+              <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
+              <p><strong>Estimated Grade:</strong> {score.grade}</p>
+            </div>
+          )}
+
+          <footer className="pt-6 border-t mt-8 text-center space-y-2 text-sm print:hidden">
+            <h2 className="text-lg font-semibold">👩🏻‍🏫 Created By</h2>
+            <p className="font-semibold">Nur Syahmin Alya Masri</p>
+            <p>PPPDG10</p>
+            <p>📧 <a className="text-blue-600 hover:underline" href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
+            <div className="mt-4">
+              <a
+                href="https://forms.gle/H6gvWFeAwQCwY9LK7"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-4 py-2 rounded text-sm"
+              >
+                📋 Give Feedback
+              </a>
+            </div>
           </footer>
         </div>
       </div>
