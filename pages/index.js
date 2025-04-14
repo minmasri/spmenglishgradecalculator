@@ -148,14 +148,17 @@ export default function Home() {
           <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
           {etr && (
-            <div className="bg-blue-50 p-4 rounded shadow">
-              <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-              {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-                <p key={paper}>{etr.paperNotes[paper]}</p>
-              ))}
-              <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
-            </div>
-          )}
+  <div className="bg-blue-50 p-4 rounded shadow print:hidden">
+    <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+    {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+      <p key={paper}>
+        {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
+      </p>
+    ))}
+    <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+  </div>
+)}
+
 
           <div className="grid gap-4">
             {[
