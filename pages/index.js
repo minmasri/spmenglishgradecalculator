@@ -13,14 +13,14 @@ export default function Home() {
     writing: 0.25,
     reading: 0.25,
     listening: 0.25,
-    speaking: 0.25
+    speaking: 0.25,
   };
 
   const maxMarks = {
     writing: 60,
     reading: 40,
     listening: 30,
-    speaking: 24
+    speaking: 24,
   };
 
   const getGrade = (percentage) => {
@@ -47,68 +47,49 @@ export default function Home() {
     });
     return {
       percentage: total.toFixed(2),
-      grade: getGrade(total)
+      grade: getGrade(total),
     };
   };
 
   const getETR = () => {
     const targetScore = Number(target);
+    const current = calculate();
     const scores = { writing, reading, listening, speaking };
-    const paperNotes = {};
     const results = {};
+    const paperNotes = {};
+    let totalAchieved = 0;
 
-    let currentPercentage = 0;
-    let totalWeightUsed = 0;
-
-    Object.entries(scores).forEach(([paper, value]) => {
-      const score = Number(value);
+    Object.entries(scores).forEach(([paper, score]) => {
       const max = maxMarks[paper];
       const weight = weights[paper];
+      const required = ((targetScore / 100) * max).toFixed(1);
+      const actual = Number(score);
 
-      if (value) {
-        const percent = (score / max) * weight * 100;
-        currentPercentage += percent;
-        totalWeightUsed += weight;
-      }
-    });
-
-    const remainingWeight = 1 - totalWeightUsed;
-    const remainingTarget = targetScore - currentPercentage;
-    const neededPerWeight = remainingWeight > 0 ? remainingTarget / remainingWeight : 0;
-
-    Object.entries(scores).forEach(([paper, value]) => {
-      const max = maxMarks[paper];
-      const weight = weights[paper];
-      const requiredRaw = (targetScore / 100) * max;
-      const actualRaw = value ? Number(value) : null;
-
-      if (value) {
-        if (actualRaw >= requiredRaw) {
-          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
-        } else if (actualRaw >= requiredRaw * 0.8) {
-          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
-        } else {
-          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
-        }
+      if (!score) {
+        const remainingRaw = (((targetScore - current.percentage) / 100) * max).toFixed(1);
+        results[paper] = { actual: '—', required: remainingRaw };
+        paperNotes[paper] = `🧮 Estimated required: ${remainingRaw}`;
       } else {
-        const estimatedRaw = (neededPerWeight / 100) * max;
-        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed)`;
+        results[paper] = { actual, required };
+        if (actual >= required) {
+          paperNotes[paper] = `✅ On track`;
+        } else if (actual >= required * 0.8) {
+          paperNotes[paper] = `🟡 Needs improvement`;
+        } else {
+          paperNotes[paper] = `🔴 Far from target`;
+        }
+        totalAchieved += (actual / max) * weight * 100;
       }
-
-      results[paper] = {
-        actual: value ? Number(value) : null,
-        required: value ? requiredRaw.toFixed(1) : ((neededPerWeight / 100) * max).toFixed(1)
-      };
     });
 
-    const progress = Math.min((currentPercentage / targetScore) * 100, 100);
     results.paperNotes = paperNotes;
 
-    results.overallNote = currentPercentage >= targetScore
-      ? `🏆 You have reached your target!`
-      : `🔵 You need ${(targetScore - currentPercentage).toFixed(1)}% more to reach your target`;
-
-    results.progress = progress;
+    if (totalAchieved >= targetScore) {
+      results.overallNote = `🏆 You have reached your target!`;
+    } else {
+      const neededMore = (targetScore - totalAchieved).toFixed(1);
+      results.overallNote = `🔵 You need ${neededMore}% more to reach your target`;
+    }
 
     return results;
   };
@@ -148,17 +129,16 @@ export default function Home() {
           <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
           {etr && (
-  <div className="bg-blue-50 p-4 rounded shadow print:hidden">
-    <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-    {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-      <p key={paper}>
-        {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
-      </p>
-    ))}
-    <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
-  </div>
-)}
-
+            <div className="bg-blue-50 p-4 rounded shadow print:hidden">
+              <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+              {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+                <p key={paper}>
+                  {etr.paperNotes[paper]} ({etr[paper]?.actual} / {etr[paper]?.required} needed) in <em>{paper}</em>
+                </p>
+              ))}
+              <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+            </div>
+          )}
 
           <div className="grid gap-4">
             {[
@@ -185,7 +165,9 @@ export default function Home() {
               <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
                 <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
                 {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-                  <p key={paper}>{etr.paperNotes[paper]}</p>
+                  <p key={paper}>
+                    {etr.paperNotes[paper]} ({etr[paper]?.actual} / {etr[paper]?.required} needed) in <em>{paper}</em>
+                  </p>
                 ))}
                 <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
               </div>
