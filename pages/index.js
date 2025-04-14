@@ -1,4 +1,3 @@
-
 import Head from 'next/head';
 import { useState } from 'react';
 
@@ -126,8 +125,9 @@ export default function Home() {
           <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
           <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
+          {/* Show ETR only once on screen */}
           {etr && (
-            <div className="bg-blue-50 p-4 rounded shadow">
+            <div className="bg-blue-50 p-4 rounded shadow print:hidden">
               <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
               {['reading', 'writing', 'speaking', 'listening'].map(paper => (
                 <p key={paper}>
@@ -158,18 +158,19 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Printable report summary */}
           <div className="bg-green-50 p-4 rounded shadow print-only">
-      {etr && (
-        <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
-          <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-          {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-            <p key={paper}>
-              {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
-            </p>
-          ))}
-          <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
-        </div>
-      )}
+            {etr && (
+              <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4 hidden print:block">
+                <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+                {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+                  <p key={paper}>
+                    {etr.paperNotes[paper]} ({etr[paper]?.actual ?? '—'} / {etr[paper]?.required} needed) in <em>{paper}</em>
+                  </p>
+                ))}
+                <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+              </div>
+            )}
             <p><strong>Student Name:</strong> {studentName || '—'}</p>
             <p className="underline font-semibold mt-2">Paper Scores:</p>
             <ul className="list-disc pl-5 space-y-1">
