@@ -1,5 +1,6 @@
 import Head from 'next/head';
 import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function Home() {
   const [writing, setWriting] = useState('');
@@ -21,6 +22,13 @@ export default function Home() {
     reading: 40,
     listening: 30,
     speaking: 24
+  };
+
+  const paperLabels = {
+    reading: 'Reading',
+    writing: 'Writing',
+    listening: 'Listening',
+    speaking: 'Speaking'
   };
 
   const getGrade = (percentage) => {
@@ -84,15 +92,15 @@ export default function Home() {
 
       if (value) {
         if (actualRaw >= requiredRaw) {
-          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
+          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
         } else if (actualRaw >= requiredRaw * 0.8) {
-          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
+          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
         } else {
-          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed)`;
+          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
         }
       } else {
         const estimatedRaw = (neededPerWeight / 100) * max;
-        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed)`;
+        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
       }
 
       results[paper] = {
@@ -199,12 +207,15 @@ export default function Home() {
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
           </div>
 
-          <footer className="text-center text-sm pt-6 border-t mt-8 print:hidden">
+          <footer className="text-center text-sm pt-6 border-t mt-8 print:hidden space-y-2">
             <p className="font-semibold">👩🏻‍🏫 Created by Nur Syahmin Alya Masri</p>
             <p>📧 <a href="mailto:n.syahminalya@gmail.com" className="text-blue-600 underline">n.syahminalya@gmail.com</a></p>
-            <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="mt-2 inline-block bg-yellow-500 text-white px-4 py-2 rounded">
+            <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="inline-block bg-yellow-500 text-white px-4 py-2 rounded">
               📋 Give Feedback
             </a>
+            <div className="mt-2 text-gray-400">
+              <Analytics />
+            </div>
           </footer>
         </div>
       </div>
