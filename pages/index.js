@@ -147,25 +147,23 @@ export default function Home() {
       <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
         <h1>🎯 <b>SPM CEFR English Grade Calculator</b></h1>
 
-        <label>Student Name</label>
-        <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Enter name" />
-
-        <label>Enter target %</label>
-        <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Target %" />
-
-        <label>Paper 1 (Reading)</label>
-        <input type="number" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Enter marks" />
-
-        <label>Paper 2 (Writing)</label>
-        <input type="number" value={writing} onChange={(e) => setWriting(e.target.value)} placeholder="Enter marks" />
-
-        <label>Paper 3 (Speaking)</label>
-        <input type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} placeholder="Enter marks" />
-
-        <label>Paper 4 (Listening)</label>
-        <input type="number" value={listening} onChange={(e) => setListening(e.target.value)} placeholder="Enter marks" />
+        <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Student Name" />
+        <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Enter target %" />
+        <input type="number" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Paper 1 (Reading)" />
+        <input type="number" value={writing} onChange={(e) => setWriting(e.target.value)} placeholder="Paper 2 (Writing)" />
+        <input type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} placeholder="Paper 3 (Speaking)" />
+        <input type="number" value={listening} onChange={(e) => setListening(e.target.value)} placeholder="Paper 4 (Listening)" />
 
         <div style={{ background: '#e6fff3', padding: 15, marginTop: 20 }}>
+          {etr && (
+            <div style={{ background: '#dbeeff', padding: 10, marginBottom: 10 }}>
+              <h4><b>ETR — To Reach {target}%</b></h4>
+              {Object.entries(etr.paperNotes).map(([paper, note]) => (
+                <p key={paper}>{note}</p>
+              ))}
+              <p><b>{etr.overallNote}</b></p>
+            </div>
+          )}
           <p><b>Student Name:</b> {studentName || '—'}</p>
           <p><b>Paper Scores:</b></p>
           <ul>
@@ -177,16 +175,6 @@ export default function Home() {
           <p><b>Current Estimated Total:</b> {score.percentage}%</p>
           <p><b>Estimated Grade:</b> {score.grade}</p>
         </div>
-
-        {etr && (
-          <div style={{ marginTop: 20 }}>
-            <h4>🎯 Target Analysis:</h4>
-            {Object.entries(etr.paperNotes).map(([paper, note]) => (
-              <p key={paper}>{note}</p>
-            ))}
-            <p><b>{etr.overallNote}</b></p>
-          </div>
-        )}
 
         <div style={{ marginTop: 20 }}>
           <button onClick={resetAll} style={{ marginRight: 10, backgroundColor: 'red', color: 'white' }}>Reset</button>
