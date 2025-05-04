@@ -2,30 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@media print {
-  .input-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.input-group label {
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-}
-
-  body * {
-    visibility: hidden;
-  }
-  .print-only,
-  .print-only * {
-    visibility: visible;
-  }
-  .print-only {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 2rem;
-  }
+/* Custom styles */
+body {
+  font-family: system-ui, sans-serif;
 }

@@ -1,17 +1,16 @@
 {
-  "name": "english-grade-app",
+  "name": "spm-grade-calculator",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "export": "next export",
     "start": "next start"
   },
   "dependencies": {
-    "next": "13.4.12",
+    "next": "14.1.0",
     "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "@vercel/analytics": "^1.2.1"
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
