@@ -183,11 +183,22 @@ export default function Home() {
             <p><strong>Student Name:</strong> {studentName || '—'}</p>
             <p className="underline font-semibold mt-2">Paper Scores:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Paper 1 (Reading): {reading || '—'} / 40</li>
-              <li>Paper 2 (Writing): {writing || '—'} / 60</li>
-              <li>Paper 3 (Speaking): {speaking || '—'} / 24</li>
-              <li>Paper 4 (Listening): {listening || '—'} / 30</li>
-            </ul>
+  {[
+    { name: 'Reading', key: 'reading', max: 40 },
+    { name: 'Writing', key: 'writing', max: 60 },
+    { name: 'Speaking', key: 'speaking', max: 24 },
+    { name: 'Listening', key: 'listening', max: 30 },
+  ].map(({ name, key, max }) => {
+    const val = { reading, writing, speaking, listening }[key];
+    const weighted = val ? ((Number(val) / max) * 25).toFixed(2) : '—';
+    return (
+      <li key={key}>
+        Paper {name === 'Reading' ? '1' : name === 'Writing' ? '2' : name === 'Speaking' ? '3' : '4'} ({name}): {val || '—'} / {max} ({weighted}% of total)
+      </li>
+    );
+  })}
+</ul>
+
             <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
           </div>
