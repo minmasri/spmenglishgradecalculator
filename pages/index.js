@@ -158,21 +158,15 @@ export default function Home() {
               { label: 'Paper 4 (Listening)', value: listening, setter: setListening, max: 30 }
             ].map(({ label, value, setter, max }) => (
               <div className="relative" key={label}>
-  <label className="absolute left-3 top-0 text-sm text-gray-600 bg-white px-1 transform -translate-y-1/2">
-    {label}
-    {etr && etr.paperNotes[paperKeyMap[label]] && (
-      <span className="ml-1 text-xs text-gray-500">({etr.paperNotes[paperKeyMap[label]].split('(')[0].trim()})</span>
-    )}
-  </label>
-  <input
-    type="number"
-    value={value}
-    onChange={(e) => setter(e.target.value)}
-    className="w-full mt-5 p-2 border rounded shadow-sm"
-    placeholder="Enter marks"
-  />
-</div>
-
+                <input
+                  type="number"
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className="w-full p-2 pr-32 border rounded shadow-sm"
+                  placeholder="Enter marks"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">{label} /{max}</span>
+              </div>
             ))}
           </div>
 
