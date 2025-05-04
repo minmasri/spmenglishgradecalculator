@@ -144,30 +144,28 @@ export default function Home() {
       <Head>
         <title>SPM CEFR English Grade Calculator</title>
       </Head>
-      <div className="max-w-xl mx-auto p-6">
-        <h1 className="text-xl font-bold mb-4">🎯 SPM CEFR English Grade Calculator</h1>
+      <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
+        <h1>🎯 <b>SPM CEFR English Grade Calculator</b></h1>
 
-        {[
-          ['Student Name', studentName, setStudentName],
-          ['Enter target %', target, setTarget],
-          ['Paper 1 (Reading)', reading, setReading],
-          ['Paper 2 (Writing)', writing, setWriting],
-          ['Paper 3 (Speaking)', speaking, setSpeaking],
-          ['Paper 4 (Listening)', listening, setListening],
-        ].map(([label, val, setter], idx) => (
-          <div className="mb-4" key={idx}>
-            <label className="font-medium">{label}</label>
-            <input
-              type="text"
-              className="border p-2 w-full"
-              value={val}
-              onChange={(e) => setter(e.target.value)}
-              placeholder="Enter marks"
-            />
-          </div>
-        ))}
+        <label>Student Name</label>
+        <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Enter name" />
 
-        <div className="bg-green-100 p-4 rounded mt-4">
+        <label>Enter target %</label>
+        <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Target %" />
+
+        <label>Paper 1 (Reading)</label>
+        <input type="number" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Enter marks" />
+
+        <label>Paper 2 (Writing)</label>
+        <input type="number" value={writing} onChange={(e) => setWriting(e.target.value)} placeholder="Enter marks" />
+
+        <label>Paper 3 (Speaking)</label>
+        <input type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} placeholder="Enter marks" />
+
+        <label>Paper 4 (Listening)</label>
+        <input type="number" value={listening} onChange={(e) => setListening(e.target.value)} placeholder="Enter marks" />
+
+        <div style={{ background: '#e6fff3', padding: 15, marginTop: 20 }}>
           <p><b>Student Name:</b> {studentName || '—'}</p>
           <p><b>Paper Scores:</b></p>
           <ul>
@@ -181,8 +179,8 @@ export default function Home() {
         </div>
 
         {etr && (
-          <div className="mt-4">
-            <h4 className="font-semibold">🎯 Target Analysis:</h4>
+          <div style={{ marginTop: 20 }}>
+            <h4>🎯 Target Analysis:</h4>
             {Object.entries(etr.paperNotes).map(([paper, note]) => (
               <p key={paper}>{note}</p>
             ))}
@@ -190,16 +188,16 @@ export default function Home() {
           </div>
         )}
 
-        <div className="mt-4 space-x-2">
-          <button onClick={resetAll} className="bg-red-500 text-white px-4 py-2">Reset</button>
-          <button onClick={() => window.print()} className="bg-blue-500 text-white px-4 py-2">Print</button>
+        <div style={{ marginTop: 20 }}>
+          <button onClick={resetAll} style={{ marginRight: 10, backgroundColor: 'red', color: 'white' }}>Reset</button>
+          <button onClick={() => window.print()}>Print</button>
         </div>
 
-        <footer className="text-sm mt-8">
+        <footer style={{ marginTop: 40, fontSize: 14 }}>
           <p>🛠️ Created by Nur Syahmin Alya Masri</p>
           <p><a href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
-          <button className="bg-yellow-300 px-4 py-1 mt-2">💬 Give Feedback</button>
-          <p className="mt-2">👁️ Visitors (local count): {visits}</p>
+          <button style={{ backgroundColor: '#ffcc00', padding: '6px 12px', borderRadius: 4 }}>💬 Give Feedback</button>
+          <p style={{ marginTop: 10 }}>👁️ Visitors (local count): {visits}</p>
         </footer>
       </div>
     </>
