@@ -189,21 +189,22 @@ export default function Home() {
               { label: 'Paper 3 (Speaking)', value: speaking, setter: setSpeaking, max: 24, key: 'speaking' },
               { label: 'Paper 4 (Listening)', value: listening, setter: setListening, max: 30, key: 'listening' }
             ].map(({ label, value, setter, max, key }) => (
-<div className="relative" key={label}>
-  <label className="absolute left-3 top-0 text-sm text-gray-600 bg-white px-1 transform -translate-y-1/2">
-    {label}
-    {etr && etr.paperNotes[paperKeyMap[label]] && (
-      <span className="ml-1 text-xs text-gray-500">({etr.paperNotes[paperKeyMap[label]].split('(')[0].trim()})</span>
-    )}
-  </label>
-  <input
-    type="number"
-    value={value}
-    onChange={(e) => setter(e.target.value)}
-    className="w-full mt-5 p-2 border rounded shadow-sm"
-    placeholder="Enter marks"
-  />
-</div>            ))}
+              <div className="relative" key={label}>
+                <label className="absolute left-3 top-0 text-sm text-gray-600 bg-white px-1 transform -translate-y-1/2">
+                  {label}
+                  {etr && etr.paperNotes[key] && (
+                    <span className="ml-1 text-xs text-gray-500">({etr.paperNotes[key].split('(')[0]})</span>
+                  )}
+                </label>
+                <input
+                  type="number"
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className="w-full mt-5 p-2 border rounded shadow-sm"
+                  placeholder="Enter marks"
+                />
+              </div>
+            ))}
           </div>
 
           {/* Print-only green box */}
