@@ -24,13 +24,6 @@ export default function Home() {
     speaking: 24
   };
 
-  const paperLabels = {
-    reading: 'Reading',
-    writing: 'Writing',
-    listening: 'Listening',
-    speaking: 'Speaking'
-  };
-
   const getGrade = (percentage) => {
     if (percentage >= 90) return 'A+';
     if (percentage >= 80) return 'A';
@@ -92,15 +85,15 @@ export default function Home() {
 
       if (value) {
         if (actualRaw >= requiredRaw) {
-          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
+          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         } else if (actualRaw >= requiredRaw * 0.8) {
-          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
+          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         } else {
-          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
+          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         }
       } else {
-        const estimatedRaw = (neededPerWeight / 100) * max;
-        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed) in ${paperLabels[paper]}`;
+        const estimatedRaw = Math.min((neededPerWeight / 100) * max, max);
+        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
       }
 
       results[paper] = {
@@ -120,6 +113,8 @@ export default function Home() {
 
     return results;
   };
+
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   const resetAll = () => {
     setStudentName('');
@@ -155,16 +150,6 @@ export default function Home() {
           <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
           <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
-          {etr && (
-            <div className="bg-blue-50 p-4 rounded shadow">
-              <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
-              {['reading', 'writing', 'speaking', 'listening'].map(paper => (
-                <p key={paper}>{etr.paperNotes[paper]}</p>
-              ))}
-              <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
-            </div>
-          )}
-
           <div className="grid gap-4">
             {[
               { label: 'Paper 1 (Reading)', value: reading, setter: setReading, max: 40 },
@@ -185,7 +170,7 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="bg-green-50 p-4 rounded shadow print-only">
+          <div className="bg-green-50 p-4 rounded shadow print:block">
             {etr && (
               <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
                 <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
@@ -213,9 +198,7 @@ export default function Home() {
             <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="inline-block bg-yellow-500 text-white px-4 py-2 rounded">
               📋 Give Feedback
             </a>
-            <div className="mt-2 text-gray-400">
-              <Analytics />
-            </div>
+            <div className="text-gray-500 text-xs mt-2">📊 Visitors: <Analytics /></div>
           </footer>
         </div>
       </div>
