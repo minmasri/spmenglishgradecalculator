@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 @media print {
+  .input-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.input-group label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
   body * {
     visibility: hidden;
   }
