@@ -1,5 +1,6 @@
 import Head from 'next/head';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function Home() {
   const [writing, setWriting] = useState('');
@@ -8,7 +9,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState('');
   const [target, setTarget] = useState('');
   const [studentName, setStudentName] = useState('');
-  const [visits, setVisits] = useState(0);
 
   const weights = {
     writing: 0.25,
@@ -40,18 +40,15 @@ export default function Home() {
   const calculate = () => {
     const scores = { writing, reading, listening, speaking };
     let total = 0;
-    const paperPercentages = {};
     Object.entries(scores).forEach(([key, val]) => {
       if (val) {
         const percent = (Number(val) / maxMarks[key]) * weights[key] * 100;
         total += percent;
-        paperPercentages[key] = percent.toFixed(2);
       }
     });
     return {
       percentage: total.toFixed(2),
-      grade: getGrade(total),
-      paperPercentages
+      grade: getGrade(total)
     };
   };
 
@@ -107,15 +104,17 @@ export default function Home() {
 
     const progress = Math.min((currentPercentage / targetScore) * 100, 100);
     results.paperNotes = paperNotes;
+
     results.overallNote = currentPercentage >= targetScore
       ? `🏆 You have reached your target!`
       : `🔵 You need ${(targetScore - currentPercentage).toFixed(1)}% more to reach your target`;
+
     results.progress = progress;
 
     return results;
   };
 
-  const capitalize = (word) => word.charAt(0).toUpperCase() + word.slice(1);
+  const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
 
   const resetAll = () => {
     setStudentName('');
@@ -130,63 +129,78 @@ export default function Home() {
   const scores = { writing, reading, listening, speaking };
   const etr = target ? getETR() : null;
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedVisits = localStorage.getItem('visits') || 0;
-      const newVisits = Number(storedVisits) + 1;
-      localStorage.setItem('visits', newVisits);
-      setVisits(newVisits);
-    }
-  }, []);
-
   return (
     <>
       <Head>
         <title>SPM CEFR English Grade Calculator</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
       </Head>
-      <div style={{ maxWidth: 500, margin: 'auto', padding: 20 }}>
-        <h1>🎯 <b>SPM CEFR English Grade Calculator</b></h1>
 
-        <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Student Name" />
-        <input type="number" value={target} onChange={(e) => setTarget(e.target.value)} placeholder="Enter target %" />
-        <input type="number" value={reading} onChange={(e) => setReading(e.target.value)} placeholder="Paper 1 (Reading)" />
-        <input type="number" value={writing} onChange={(e) => setWriting(e.target.value)} placeholder="Paper 2 (Writing)" />
-        <input type="number" value={speaking} onChange={(e) => setSpeaking(e.target.value)} placeholder="Paper 3 (Speaking)" />
-        <input type="number" value={listening} onChange={(e) => setListening(e.target.value)} placeholder="Paper 4 (Listening)" />
-
-        <div style={{ background: '#e6fff3', padding: 15, marginTop: 20 }}>
-          {etr && (
-            <div style={{ background: '#dbeeff', padding: 10, marginBottom: 10 }}>
-              <h4><b>ETR — To Reach {target}%</b></h4>
-              {Object.entries(etr.paperNotes).map(([paper, note]) => (
-                <p key={paper}>{note}</p>
-              ))}
-              <p><b>{etr.overallNote}</b></p>
+      <div className="min-h-screen bg-gray-100 text-gray-900 p-6 print:bg-white print:text-black">
+        <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow space-y-6">
+          <div className="flex justify-between items-center space-x-2">
+            <h1 className="text-xl font-bold">🎯 SPM CEFR English Grade Calculator</h1>
+            <div className="flex space-x-2">
+              <button onClick={resetAll} className="text-sm bg-red-500 text-white px-3 py-1 rounded">Reset</button>
+              <button onClick={() => window.print()} className="text-sm bg-blue-500 text-white px-3 py-1 rounded">Print</button>
             </div>
-          )}
-          <p><b>Student Name:</b> {studentName || '—'}</p>
-          <p><b>Paper Scores:</b></p>
-          <ul>
-            <li>Paper 1 (Reading): {reading || '—'} / 40 ({score.paperPercentages.reading || '—'}% of total)</li>
-            <li>Paper 2 (Writing): {writing || '—'} / 60 ({score.paperPercentages.writing || '—'}% of total)</li>
-            <li>Paper 3 (Speaking): {speaking || '—'} / 24 ({score.paperPercentages.speaking || '—'}% of total)</li>
-            <li>Paper 4 (Listening): {listening || '—'} / 30 ({score.paperPercentages.listening || '—'}% of total)</li>
-          </ul>
-          <p><b>Current Estimated Total:</b> {score.percentage}%</p>
-          <p><b>Estimated Grade:</b> {score.grade}</p>
-        </div>
+          </div>
 
-        <div style={{ marginTop: 20 }}>
-          <button onClick={resetAll} style={{ marginRight: 10, backgroundColor: 'red', color: 'white' }}>Reset</button>
-          <button onClick={() => window.print()}>Print</button>
-        </div>
+          <input className="p-2 border rounded w-full" placeholder="Student Name" value={studentName} onChange={(e) => setStudentName(e.target.value)} />
+          <input type="number" className="p-2 border rounded w-full" placeholder="Enter target %" value={target} onChange={(e) => setTarget(e.target.value)} />
 
-        <footer style={{ marginTop: 40, fontSize: 14 }}>
-          <p>🛠️ Created by Nur Syahmin Alya Masri</p>
-          <p><a href="mailto:n.syahminalya@gmail.com">n.syahminalya@gmail.com</a></p>
-          <button style={{ backgroundColor: '#ffcc00', padding: '6px 12px', borderRadius: 4 }}>💬 Give Feedback</button>
-          <p style={{ marginTop: 10 }}>👁️ Visitors (local count): {visits}</p>
-        </footer>
+          <div className="grid gap-4">
+            {[
+              { label: 'Paper 1 (Reading)', value: reading, setter: setReading, max: 40 },
+              { label: 'Paper 2 (Writing)', value: writing, setter: setWriting, max: 60 },
+              { label: 'Paper 3 (Speaking)', value: speaking, setter: setSpeaking, max: 24 },
+              { label: 'Paper 4 (Listening)', value: listening, setter: setListening, max: 30 }
+            ].map(({ label, value, setter, max }) => (
+              <div className="relative" key={label}>
+                <input
+                  type="number"
+                  value={value}
+                  onChange={(e) => setter(e.target.value)}
+                  className="w-full p-2 pr-32 border rounded shadow-sm"
+                  placeholder="Enter marks"
+                />
+                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-sm text-gray-500">{label} /{max}</span>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-green-50 p-4 rounded shadow print:block">
+            {etr && (
+              <div className="bg-blue-100 border border-blue-300 p-4 rounded mb-4">
+                <p className="font-bold text-blue-800">ETR — To Reach {target}%</p>
+                {['reading', 'writing', 'speaking', 'listening'].map(paper => (
+                  <p key={paper}>{etr.paperNotes[paper]}</p>
+                ))}
+                <p className="mt-2 font-bold text-blue-700">{etr.overallNote}</p>
+              </div>
+            )}
+            <p><strong>Student Name:</strong> {studentName || '—'}</p>
+            <p className="underline font-semibold mt-2">Paper Scores:</p>
+            <ul className="list-disc pl-5 space-y-1">
+              <li>Paper 1 (Reading): {reading || '—'} / 40</li>
+              <li>Paper 2 (Writing): {writing || '—'} / 60</li>
+              <li>Paper 3 (Speaking): {speaking || '—'} / 24</li>
+              <li>Paper 4 (Listening): {listening || '—'} / 30</li>
+            </ul>
+            <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
+            <p><strong>Estimated Grade:</strong> {score.grade}</p>
+          </div>
+
+          <footer className="text-center text-sm pt-6 border-t mt-8 print:hidden space-y-2">
+            <p className="font-semibold">👩🏻‍🏫 Created by Nur Syahmin Alya Masri</p>
+            <p>📧 <a href="mailto:n.syahminalya@gmail.com" className="text-blue-600 underline">n.syahminalya@gmail.com</a></p>
+            <a href="https://forms.gle/H6gvWFeAwQCwY9LK7" target="_blank" rel="noopener noreferrer" className="inline-block bg-yellow-500 text-white px-4 py-2 rounded">
+              📋 Give Feedback
+            </a>
+            <div className="text-gray-500 text-xs mt-2">📊 Visitors: <Analytics /></div>
+          </footer>
+        </div>
       </div>
     </>
   );
