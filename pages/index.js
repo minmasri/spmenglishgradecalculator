@@ -85,15 +85,15 @@ export default function Home() {
 
       if (value) {
         if (actualRaw >= requiredRaw) {
-          paperNotes[paper] = ✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)};
+          paperNotes[paper] = `✅ On track (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         } else if (actualRaw >= requiredRaw * 0.8) {
-          paperNotes[paper] = 🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)};
+          paperNotes[paper] = `🟡 Needs improvement (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         } else {
-          paperNotes[paper] = 🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)};
+          paperNotes[paper] = `🔴 Far from target (${actualRaw} / ${requiredRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
         }
       } else {
         const estimatedRaw = Math.min((neededPerWeight / 100) * max, max);
-        paperNotes[paper] = 🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed) in ${capitalize(paper)};
+        paperNotes[paper] = `🧮 Estimated required: ${estimatedRaw.toFixed(1)} (— / ${estimatedRaw.toFixed(1)} needed) in ${capitalize(paper)}`;
       }
 
       results[paper] = {
@@ -106,8 +106,8 @@ export default function Home() {
     results.paperNotes = paperNotes;
 
     results.overallNote = currentPercentage >= targetScore
-      ? 🏆 You have reached your target!
-      : 🔵 You need ${(targetScore - currentPercentage).toFixed(1)}% more to reach your target;
+      ? `🏆 You have reached your target!`
+      : `🔵 You need ${(targetScore - currentPercentage).toFixed(1)}% more to reach your target`;
 
     results.progress = progress;
 
@@ -184,22 +184,29 @@ export default function Home() {
             <p className="underline font-semibold mt-2">Paper Scores:</p>
             <ul className="list-disc pl-5 space-y-1">
               <li>
-  Paper 1 (Reading): {reading} / 40
-  <span className="text-blue-600"> ({((reading / 40) * 25).toFixed(2)}%)</span>
-</li>
-<li>
-  Paper 2 (Writing): {writing} / 60
-  <span className="text-green-600"> ({((writing / 60) * 25).toFixed(2)}%)</span>
-</li>
-<li>
-  Paper 3 (Speaking): {speaking} / 24
-  <span className="text-purple-600"> ({((speaking / 24) * 25).toFixed(2)}%)</span>
-</li>
-<li>
-  Paper 4 (Listening): {listening} / 30
-  <span className="text-red-600"> ({((listening / 30) * 25).toFixed(2)}%)</span>
-</li>
-
+                Paper 1 (Reading): {reading || '—'} / 40
+                {reading && (
+                  <span className="text-blue-600"> ({((reading / 40) * 25).toFixed(2)}%)</span>
+                )}
+              </li>
+              <li>
+                Paper 2 (Writing): {writing || '—'} / 60
+                {writing && (
+                  <span className="text-green-600"> ({((writing / 60) * 25).toFixed(2)}%)</span>
+                )}
+              </li>
+              <li>
+                Paper 3 (Speaking): {speaking || '—'} / 24
+                {speaking && (
+                  <span className="text-purple-600"> ({((speaking / 24) * 25).toFixed(2)}%)</span>
+                )}
+              </li>
+              <li>
+                Paper 4 (Listening): {listening || '—'} / 30
+                {listening && (
+                  <span className="text-red-600"> ({((listening / 30) * 25).toFixed(2)}%)</span>
+                )}
+              </li>
             </ul>
             <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
