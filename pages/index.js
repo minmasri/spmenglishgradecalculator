@@ -183,10 +183,23 @@ export default function Home() {
             <p><strong>Student Name:</strong> {studentName || '—'}</p>
             <p className="underline font-semibold mt-2">Paper Scores:</p>
             <ul className="list-disc pl-5 space-y-1">
-              <li>Paper 1 (Reading): {reading || '—'} / 40</li>
-              <li>Paper 2 (Writing): {writing || '—'} / 60</li>
-              <li>Paper 3 (Speaking): {speaking || '—'} / 24</li>
-              <li>Paper 4 (Listening): {listening || '—'} / 30</li>
+              <li>
+  Paper 1 (Reading): {reading} / 40
+  <span className="text-blue-600"> ({((reading / 40) * 25).toFixed(2)}%)</span>
+</li>
+<li>
+  Paper 2 (Writing): {writing} / 60
+  <span className="text-green-600"> ({((writing / 60) * 25).toFixed(2)}%)</span>
+</li>
+<li>
+  Paper 3 (Speaking): {speaking} / 24
+  <span className="text-purple-600"> ({((speaking / 24) * 25).toFixed(2)}%)</span>
+</li>
+<li>
+  Paper 4 (Listening): {listening} / 30
+  <span className="text-red-600"> ({((listening / 30) * 25).toFixed(2)}%)</span>
+</li>
+
             </ul>
             <p className="mt-2"><strong>Current Estimated Total:</strong> {score.percentage}%</p>
             <p><strong>Estimated Grade:</strong> {score.grade}</p>
